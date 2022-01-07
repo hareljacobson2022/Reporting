@@ -4,6 +4,7 @@ import numpy as np
 from pandas.tseries.offsets import BDay
 import eikon
 
+glb = globals()
 
 #implied correlation function deriving from three implied volatilities using fx implied vol triangle
 def implied_correlation(v1,v2,v3):
@@ -17,7 +18,7 @@ eikon.set_app_key('de5fd998085b4279b6379598d1503c3796432a5a')
 file_location = 'C:/Users/user/Downloads'
 
 #setting valuation date and reference rate (value date -1BD)
-value_date = '2022-01-05'
+value_date = '2022-01-06'
 ref_date = pd.to_datetime(value_date) - BDay(1)
 ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
 

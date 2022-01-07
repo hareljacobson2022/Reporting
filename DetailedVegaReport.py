@@ -103,21 +103,21 @@ sns.barplot(x=df_usdils_agg.index, y= df_usdils_agg['25_RR'], ax = axes[0,1])
 sns.barplot(x=df_usdils_agg.index, y= df_usdils_agg['25_BF'], ax = axes[1,0])
 sns.barplot(x=df_usdils_agg.index, y= df_usdils_agg['Total PnL'], ax = axes[1,1])
 
-axes[0,0].set_title(f'USD/ILS ATM Vol daily P&L breakdown by tenors. Daily P&L {total_atm_pnl: ,.0f}',fontsize=9)
-axes[0,1].set_title(f'USD/ILS Skew daily P&L breakdown by tenors. Daily P&L {total_rr_pnl: ,.0f}',fontsize=9)
-axes[1,0].set_title(f'USD/ILS vol-convexity P&L breakdown by tenors. Daily P&L {total_bf_pnl: ,.0f}',fontsize=9)
-axes[1,1].set_title(f'USD/ILS aggegated vol exposure daily P&L by tenors. Daily P&L {total_pnl:,.0f}',fontsize=9)
+axes[0,0].set_title(f'USD/ILS ATM Vol exposure breakdown by tenors. Total exposure {total_atm_pnl: ,.0f}',fontsize=9)
+axes[0,1].set_title(f'USD/ILS Skew exposure breakdown by tenors. Total exposure {total_rr_pnl: ,.0f}',fontsize=9)
+axes[1,0].set_title(f'USD/ILS vol-convexity exposure breakdown by tenors. Total exposure {total_bf_pnl: ,.0f}',fontsize=9)
+axes[1,1].set_title(f'USD/ILS aggegated vol exposure by tenors. Total exposure {total_pnl:,.0f}',fontsize=9)
 
 for i in range(0,2):
     for j in range(0,2):
         axes[i,j].set_xticklabels(x_labels, rotation=45, fontsize=8)
-        axes[i,j].set_ylabel('P&L in ILS', fontsize=9)
+        axes[i,j].set_ylabel('Exposure in ILS', fontsize=9)
         max_y = abs(max(axes[i,j].get_ylim(),key=abs))
         axes[i,j].set_ylim(-max_y,max_y)
         axes[i, j].yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
         axes[i,j].tick_params(axis='y',labelsize=9)
 
-plt.suptitle(f'Detailed Vega-related P&L by tenors for {value_date}',fontsize=10)
+plt.suptitle(f'Detailed Vega-related exposures by tenors for {value_date}',fontsize=10)
 
 plt.tight_layout(pad=3)
 plt.savefig(f'Detailed_Vega_Report_{value_date}.pdf',format='pdf')
@@ -132,21 +132,21 @@ sns.barplot(x=df_eurils_agg.index, y= df_eurils_agg['25_RR'], ax = axes[0,1])
 sns.barplot(x=df_eurils_agg.index, y= df_eurils_agg['25_BF'], ax = axes[1,0])
 sns.barplot(x=df_eurils_agg.index, y= df_eurils_agg['Total PnL'], ax = axes[1,1])
 
-axes[0,0].set_title(f'EUR/ILS ATM Vol daily P&L breakdown by tenors. Daily P&L {total_eur_rr_pnl: ,.0f}',fontsize=9)
-axes[0,1].set_title(f'EUR/ILS Skew daily P&L breakdown by tenors. Daily P&L {total_eur_rr_pnl: ,.0f}',fontsize=9)
-axes[1,0].set_title(f'EUR/ILS vol-convexity P&L breakdown by tenors. Daily P&L {total_eur_bf_pnl: ,.0f}',fontsize=9)
-axes[1,1].set_title(f'EUR/ILS aggegated vol exposure daily P&L by tenors. Daily P&L {total_eur_pnl:,.0f}',fontsize=9)
+axes[0,0].set_title(f'EUR/ILS ATM Vol exposure breakdown by tenors. Total exposure {total_eur_rr_pnl: ,.0f}',fontsize=9)
+axes[0,1].set_title(f'EUR/ILS Skew exposure breakdown by tenors. Total exposure {total_eur_rr_pnl: ,.0f}',fontsize=9)
+axes[1,0].set_title(f'EUR/ILS vol-convexity exposure breakdown by tenors. Total exposure {total_eur_bf_pnl: ,.0f}',fontsize=9)
+axes[1,1].set_title(f'EUR/ILS aggegated vol exposure by tenors. Total exposure {total_eur_pnl:,.0f}',fontsize=9)
 
 for i in range(0,2):
     for j in range(0,2):
         axes[i,j].set_xticklabels(x_labels, rotation=45, fontsize=8)
-        axes[i,j].set_ylabel('P&L in ILS', fontsize=9)
+        axes[i,j].set_ylabel('Exposure in ILS', fontsize=9)
         max_y = abs(max(axes[i,j].get_ylim(),key=abs))
         axes[i,j].set_ylim(-max_y,max_y)
         axes[i, j].yaxis.set_major_formatter(StrMethodFormatter('{x:,.0f}'))
         axes[i,j].tick_params(axis='y',labelsize=9)
 
-plt.suptitle(f'Detailed Vega-related P&L by tenors for {value_date}',fontsize=10)
+plt.suptitle(f'Detailed Vega-related exposures by tenors for {value_date}',fontsize=10)
 
 plt.tight_layout(pad=3)
 plt.savefig(f'Detailed_EURILS_Vega_Report_{value_date}.pdf',format='pdf')

@@ -10,6 +10,8 @@ from functools import reduce
 import MarketData
 sns.set()
 
+glb = globals() #using globals() function to iterate through multiple dataframes
+
 #implied correlation function deriving from three implied volatilities using fx implied vol triangle
 def implied_correlation(v1,v2,v3):
     return np.sqrt((v1**2+v2**2-v3**2)/(2*v1*v2))
@@ -32,28 +34,29 @@ raw_file = pd.read_csv(fr'{file_location}/Vega.csv',skiprows=3,header=0)
 raw_file_eurils = pd.read_csv(fr'{file_location}/VegaEURILS.csv',skiprows=3,header=0,encoding='cp1252')
 raw_file_eurusd = pd.read_csv(fr'{file_location}/VegaEURUSD.csv',skiprows=3,header=0,encoding='cp1252')
 
-df= pd.DataFrame(raw_file)
-df.set_index('Maturity',inplace=True)
-df = df.rename(columns={'Unnamed: 2' : 'Vega in $'})
+file_names= [ raw_file,raw_file_eurils,raw_file_eurusd]
+df_list = ['df' , 'df_eurils' , 'df_eurusd']
 
-df_eurils = pd.DataFrame(raw_file_eurils)
-df_eurils.set_index('Maturity',inplace=True)
-df_eurils = df_eurils.rename(columns={'Unnamed: 2':'Vega in Euro'})
+#creating multiple dataframes (df , df_eurils, df_eurusd) for Vega , VegaEURILS, and VegaEURUSD
+for name, dataframe in zip(file_names,df_list):
+    glb[dataframe] = pd.DataFrame(name)
+    glb[dataframe].set_index('Maturity', inplace=True)
+    if dataframe != 'df':
+        glb[dataframe] = glb[dataframe].rename(columns={'Unnamed: 2':'Vega in Euro'})
+    else:
+        glb[dataframe] = glb[dataframe].rename(columns={'Unnamed: 2':'Vega in $'})
 
-df_eurusd = pd.DataFrame(raw_file_eurusd)
-df_eurusd.set_index('Maturity',inplace=True)
-df_eurusd = df_eurusd.rename(columns={'Unnamed: 2':'Vega in Euro'})
 
-#removing non_numeric columns
+#removing non_numeric columns from multiple dataframes
 non_int =[]
 
 for col in df:
     if df[col].dtype !='int64':
         non_int.append(col)
 
-df = df.drop(columns=non_int)
-df_eurils = df_eurils.drop(columns=non_int)
-df_eurusd = df_eurusd.drop(columns=non_int)
+for dataframe in df_list:
+    glb[dataframe] = glb[dataframe].drop(columns=non_int)
+
 
 #merging usdils,eurils, and eurusd dataframes to aggregate values
 data_frames = [df,df_eurils,df_eurusd]
@@ -68,11 +71,16 @@ data_usdils = MarketData.data[MarketData.data.columns[0:10]].columns
 data_eurils = MarketData.data[MarketData.data.columns[10:20]].columns
 data_eurusd = MarketData.data[MarketData.data.columns[20:30]].columns
 
-df_usdils_vols = MarketData.df_usdils_vols
-df_eurils_vols = MarketData.df_eurils_vols
-df_eurusd_vols = MarketData.df_eurusd_vols
+
+#creaeting market data dfs for daily change
+vol_dfs = ['df_usdils_vols','df_eurils_vols','df_eurusd_vols']
+
+for dataframe in vol_dfs:
+    glb[dataframe] = MarketData.glb[dataframe]
+
 
 #creating dataframes of the 1-day change in values
+
 df_change = pd.DataFrame(df_usdils_vols) - pd.DataFrame(df_usdils_vols).shift(1)
 df_change_eurils = pd.DataFrame(df_eurils_vols) - pd.DataFrame(df_eurils_vols).shift(1)
 df_change_eurusd = pd.DataFrame(df_eurusd_vols) - pd.DataFrame(df_eurusd_vols).shift(1)
@@ -190,6 +198,7 @@ plt.show()
 
 #Aggregating Vega P&Ls across the different books (including aggergated values) to broadcast to
 # P&L attribution report
+
 df['vol change'] = one_day_move.values
 df_eurils['vol change'] = one_day_move_eurils.values
 df_eurusd['vol change'] = one_day_move_eurusd.values
