@@ -1,13 +1,11 @@
-import datetime
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 import seaborn as sns
-from pandas.tseries.offsets import BDay
 import eikon
 from functools import reduce
-import MarketData
+import MarketData , Files_Loader
 sns.set()
 
 glb = globals() #using globals() function to iterate through multiple dataframes
@@ -20,19 +18,14 @@ def implied_correlation(v1,v2,v3):
 #setting api key for eikon
 eikon.set_app_key('de5fd998085b4279b6379598d1503c3796432a5a')
 
-#csv reports file location
-file_location = 'C:/Users/user/Downloads'
-
 #setting valuation date and reference rate (value date -1BD)
 value_date = MarketData.value_date
-ref_date = pd.to_datetime(value_date) - BDay(1)
-ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
-
+ref_date = MarketData.ref_date
 
 #reading CSV files and creating dataframes (setting Maturity as index and renaming columns)
-raw_file = pd.read_csv(fr'{file_location}/Vega.csv',skiprows=3,header=0)
-raw_file_eurils = pd.read_csv(fr'{file_location}/VegaEURILS.csv',skiprows=3,header=0,encoding='cp1252')
-raw_file_eurusd = pd.read_csv(fr'{file_location}/VegaEURUSD.csv',skiprows=3,header=0,encoding='cp1252')
+raw_file = Files_Loader.raw_vega_usdils
+raw_file_eurils = Files_Loader.raw_vega_eurils
+raw_file_eurusd = Files_Loader.raw_vega_eurusd
 
 file_names= [ raw_file,raw_file_eurils,raw_file_eurusd]
 df_list = ['df' , 'df_eurils' , 'df_eurusd']
@@ -46,7 +39,6 @@ for name, dataframe in zip(file_names,df_list):
     else:
         glb[dataframe] = glb[dataframe].rename(columns={'Unnamed: 2':'Vega in $'})
 
-
 #removing non_numeric columns from multiple dataframes
 non_int =[]
 
@@ -58,6 +50,9 @@ for dataframe in df_list:
     glb[dataframe] = glb[dataframe].drop(columns=non_int)
 
 
+#deleting raw data files
+del raw_file,raw_file_eurusd,raw_file_eurils,non_int
+
 #merging usdils,eurils, and eurusd dataframes to aggregate values
 data_frames = [df,df_eurils,df_eurusd]
 df_merged = reduce(lambda left,right:pd.merge(left,right,on=['Maturity'],how='outer'),data_frames)
@@ -67,10 +62,9 @@ convert_rate = eikon.get_timeseries('eur=',fields='Close',start_date=ref_date,en
 
 #splitting the market data response into three dataframes
 
-data_usdils = MarketData.data[MarketData.data.columns[0:10]].columns
-data_eurils = MarketData.data[MarketData.data.columns[10:20]].columns
-data_eurusd = MarketData.data[MarketData.data.columns[20:30]].columns
-
+data_usdils = MarketData.data.iloc[:,0:10].columns
+data_eurils = MarketData.data.iloc[:,10:20].columns
+data_eurusd = MarketData.data.iloc[:,20:30].columns
 
 #creaeting market data dfs for daily change
 vol_dfs = ['df_usdils_vols','df_eurils_vols','df_eurusd_vols']

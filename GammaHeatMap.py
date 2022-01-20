@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 from pylab import *
 import seaborn as sns
-import MarketData
+import MarketData , Files_Loader
 sns.set()
 
+glb= globals()
 #defining the straddle breakeven
 def std_be(vol,t):
     return 0.8 * vol * np.sqrt(t)
@@ -21,48 +22,38 @@ data = eikon.get_timeseries(rics=ccys,fields='CLOSE',start_date=value_date,end_d
 usdils= float(data['ILS='].iloc[-1])
 eurils = float(data['EURILS='].iloc[-1])
 
-#setting file location and filename, creating dataframes
-file_location = 'C:/Users/user/Downloads'
+#retreiving files from Files_Loader and creating dataframes
 
-raw_file = pd.read_csv(fr'{file_location}/Strikes360.csv',skiprows=4,header=0, encoding='cp1252')
-raw_file_vega = pd.read_csv(fr'{file_location}/StrikesVega360.csv',skiprows=4,header=0, encoding='cp1252')
-raw_file_eurils = pd.read_csv(fr'{file_location}/Strikes360EURILS.csv',skiprows=4,header=0, encoding='cp1252')
-raw_file_vega_eurils = pd.read_csv(fr'{file_location}/StrikesVega360EURILS.csv',skiprows=4,header=0, encoding='cp1252')
+raw_file = Files_Loader.raw_file
+raw_file_vega = Files_Loader.raw_file_vega
+raw_file_eurils = Files_Loader.raw_file_eurils
+raw_file_vega_eurils = Files_Loader.raw_file_vega_eurils
 
-df,df_vega,df_eurils,df_vega_eurils = pd.DataFrame(raw_file),\
-                                      pd.DataFrame(raw_file_vega), \
-                                      pd.DataFrame(raw_file_eurils), \
-                                      pd.DataFrame(raw_file_vega_eurils)
+file_names = [raw_file, raw_file_vega , raw_file_eurils , raw_file_vega_eurils]
+df_names = ['df', 'df_vega', 'df_eurils', 'df_vega_eurils']
 
-df,df_vega, df_eurils,df_vega_eurils= df.rename(columns={'Unnamed: 0' : 'strike'}),\
-                                      df_vega.rename(columns={'Unnamed: 0':'strike'}),\
-                                      df_eurils.rename(columns={'Unnamed: 0':'strike'}),\
-                                      df_vega_eurils.rename(columns={'Unnamed: 0':'strike'})
-
-
-df.set_index('strike',inplace=True)
-df_vega.set_index('strike',inplace=True)
-df_eurils.set_index('strike',inplace=True)
-df_vega_eurils.set_index('strike',inplace=True)
-
+for name, dataframe in zip(file_names,df_names):
+    glb[dataframe] = pd.DataFrame(name)
+    glb[dataframe] = glb[dataframe].rename(columns={'Unnamed: 0':'strike'})
+    glb[dataframe].set_index('strike',inplace=True)
 
 
 #setting headers and time to expiry (in years terms)
 headers=['1wk','2wks','1m','2m','3m','6m','9m','1y']
 t = [1/52,2/52,1/12,2/12,3/12,6/12,9/12,1]
 
-headers_to_remove =[]
-headers_to_keep=[]
-for i in np.arange(2,18,2):
-    name = 'Unnamed: '+str(i)
-    headers_to_remove.append(name)
+headers_to_remove,headers_to_keep =[] , []
+
+[headers_to_remove.append('Unnamed: '+str(i)) for i in np.arange(2,18,2)]
 
 non_int,non_int_vega =[] , []
 non_int_eur , non_int_vega_eur = [],[]
 
+
 for col in df:
     if df[col].dtype !='int64':
         non_int.append(col)
+
 for col in df_vega:
     if df_vega[col].dtype !='int64':
         non_int_vega.append(col)
@@ -81,7 +72,7 @@ df_eurils = df_eurils.drop(columns=non_int_eur)
 df_vega_eurils = df_vega_eurils.drop(columns=non_int_vega_eur)
 
 
-for name,new_name in zip(headers_to_remove,headers):
+for name,new_name in np.column_stack((headers_to_remove,headers)):
     df = df.rename(columns={name : new_name})
     df_vega = df_vega.rename(columns={name: new_name})
     df_eurils = df_eurils.rename(columns={name: new_name})
@@ -91,8 +82,8 @@ for name,new_name in zip(headers_to_remove,headers):
 
 #setting ref_spot , strike_range, and increments
 ref_spot, ref_spot_eur = usdils, eurils
-strike_range = 0.10
-increment = 0.03
+strike_range = 0.20
+increment = 0.05
 min_strike, min_strike_eurils = ref_spot * np.exp(-strike_range/2) , \
                                 ref_spot_eur * np.exp(-strike_range/2)
 max_strike, max_strike_eurils = ref_spot * np.exp(strike_range/2), \

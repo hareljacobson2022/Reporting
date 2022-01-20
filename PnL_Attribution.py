@@ -1,5 +1,5 @@
 import datetime
-import VegaReport
+import VegaReport , Files_Loader
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -7,11 +7,14 @@ import seaborn as sns
 from pandas.tseries.offsets import BDay
 from matplotlib.ticker import StrMethodFormatter
 import eikon
+import refinitiv.dataplatform as rdp
 sns.set()
 
+glb=globals()
 
 #setting eiko api key
 eikon.set_app_key('de5fd998085b4279b6379598d1503c3796432a5a')
+rdp.open_desktop_session('de5fd998085b4279b6379598d1503c3796432a5a')
 
 #setting file location
 file_location = 'C:/Users/user/Downloads'
@@ -38,20 +41,27 @@ def time_delta(date1,date2):
 
 
 #reading raw csv files and creating dataframes
-raw_file = pd.read_csv(fr'{file_location}/Greeks.csv',skiprows=3,header=0,encoding='cp1252')
-raw_delta_file = pd.read_csv(fr'{file_location}/delta_{year}_{month}_{day}_22_00.csv',header=None,encoding='cp1252')
+raw_file = Files_Loader.raw_pnl_attribution
+raw_delta_file = pd.read_csv(fr'{file_location}/delta_{year}_{month}_{day}_22_00.csv',header=None)
 
 df = pd.DataFrame(raw_file)
 df_delta = pd.DataFrame(raw_delta_file)
 
+df.iloc[:,0] = df.iloc[:,0].fillna(method='ffill')
+
+#delete raw data files
+del raw_file,raw_delta_file
+
 #specifing headers and books to filter df_delta, setting index column and filtering the dataframe
 delta_headers = ['Date','Book','Ccys','delta']
-trading_books = ['Exotic','iopthedg','VanFxFx']
+trading_books = ['Exotic','iopthedg','VanFxFx','VanFxFx2','OptSPILS','OptSPFX']
 df_delta.columns = delta_headers
 
+df = df[df.iloc[:,0].isin(trading_books)]
 df.set_index('Ccys',inplace=True)
 df_delta.set_index('Book',inplace=True)
 df_delta = df_delta[df_delta.index.isin(trading_books)]
+
 
 #removing non_numeric columns from the dataframe
 non_int =[]
@@ -60,17 +70,16 @@ for col in df:
     if df[col].dtype !='float64':
         non_int.append(col)
 
-df = df.drop(columns=non_int)
-df = df.rename(columns={'Unnamed: 3': 'Delta',
-                        'Unnamed: 5': 'Gamma',
-                        'Unnamed: 7':  'Vega',
-                        'Unnamed: 9': 'Theta',
-                        'Unnamed: 11': 'Rho'})
+df = df.drop(columns=non_int).\
+    rename(columns={'Unnamed: 3': 'Delta',
+                    'Unnamed: 5': 'Gamma',
+                    'Unnamed: 7':  'Vega',
+                    'Unnamed: 9': 'Theta',
+                    'Unnamed: 11': 'Rho'})
 
 #aggregating delta by currency pairs
 df = df.groupby('Ccys').sum()
 df_delta = df_delta.groupby('Ccys').sum()
-
 
 #removing ILS/ILS data from the dataframe
 for item in df.index:
@@ -97,16 +106,14 @@ for item in rics:
     if item not in unique_list:
         unique_list.append(item)
 
-rics = unique_list
+del rics
 
+rics = unique_list
 #requesting data from eikon into dataframe
 data = eikon.get_timeseries(rics,fields='Close',start_date=ref_date,end_date=value_date,interval='daily')
 
-
 #creating returns' dataframe
-df_rtn = np.log(pd.DataFrame(data)/pd.DataFrame(data).shift(1))
-df_rtn = df_rtn.iloc[-1]
-
+df_rtn = np.log(pd.DataFrame(data)/pd.DataFrame(data).shift(1)).iloc[-1]
 
 #calcuating daily P&L based on greeks and the underlying movement (under taylor expension):
 # delta = (delta+delta(t-1))/2 * spot move
@@ -114,7 +121,6 @@ df_rtn = df_rtn.iloc[-1]
 # theta = theta * (days change from ref_date)
 # vega = retreived from VegaReport if USD/ILS, EUR/ILS, or EUR/USD. otherwise, ignored
 # rho = rho * base ccy move (assumed no move for now)
-
 pnl =[]
 for col in df.columns:
     for rate,index in zip(df_rtn,df.index):
@@ -135,27 +141,21 @@ pnl = pd.DataFrame(pnl,index=df.index,columns=df.columns)
 
 
 for ccy in df.index:
-    if ccy == 'USD/ILS':
-        pnl['Vega'][ccy] = VegaReport.total_vega_pnl
-    elif ccy=='EUR/ILS':
-        pnl['Vega'][ccy] = VegaReport.total_vega_pnl_eur
-    elif ccy=='EUR/USD':
-        pnl['Vega'][ccy] = VegaReport.tota_vega_pnl_eurusd
-    elif ccy=='GBP/ILS':
-        pnl['Vega'][ccy] = df['Vega'][ccy] *0.1
-    else:
-        pass
-
-
+    pnl['Vega'][ccy] = np.where(ccy=='USD/ILS',VegaReport.total_vega_pnl,
+                                np.where(ccy=='EUR/ILS',VegaReport.total_vega_pnl_eur,
+                                         np.where(ccy=='EUR/USD',VegaReport.tota_vega_pnl_eurusd,
+                                                  np.where(ccy=='GBP/ILS',df['Vega'][ccy]*0.1,df['Vega'][ccy]))))
+del df, df_delta
 #creating aggregated P&L from all sub currency pairs
 
 agg_pnl = pnl.sum()
 
 #modifing the USD/ILS,EUR/ILS, and EUR/USD dataframes for plotting
+ccy_names = ['USD/ILS','EUR/ILS','EUR/USD']
+df_names = ['usdils_pnl','eurils_pnl','eurusd_pnl']
 
-usdils_pnl = pd.melt(pnl[pnl.index=='USD/ILS'])
-eurils_pnl = pd.melt(pnl[pnl.index=='EUR/ILS'])
-eurusd_pnl = pd.melt(pnl[pnl.index=='EUR/USD'])
+for dataframe,name in zip(df_names,ccy_names):
+    glb[dataframe] = pd.melt(pnl[pnl.index==name])
 
 #plotting P&L attribution
 

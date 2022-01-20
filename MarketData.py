@@ -18,7 +18,7 @@ eikon.set_app_key('de5fd998085b4279b6379598d1503c3796432a5a')
 file_location = 'C:/Users/user/Downloads'
 
 #setting valuation date and reference rate (value date -1BD)
-value_date = '2022-01-06'
+value_date = '2022-01-18'
 ref_date = pd.to_datetime(value_date) - BDay(1)
 ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
 
@@ -40,17 +40,16 @@ args = (usdils_vol,eurils_vol,eurusd_vol)
 
 vol_list = np.concatenate(args)
 tickers=[]
-for item in vol_list:
-    tickers.append(str(item))
 
+[tickers.append(str(item)) for item in vol_list]
 
 data = eikon.get_timeseries(tickers,fields='Close',start_date=ref_date,end_date=value_date,interval='daily')
 convert_rate = eikon.get_timeseries('eur=',fields='Close',start_date=ref_date,end_date=value_date,interval='daily')
 
 #splitting the market data response into three dataframes
-df_usdils_vols = data[data.columns[0:10]]
-df_eurils_vols = data[data.columns[10:20]]
-df_eurusd_vols = data[data.columns[20:30]]
+df_usdils_vols = data.iloc[:,0:10]
+df_eurils_vols = data.iloc[:,10:20]
+df_eurusd_vols = data.iloc[:,20:30]
 
 #creating dataframes of the 1-day change in values
 df_change = pd.DataFrame(df_usdils_vols) - pd.DataFrame(df_usdils_vols).shift(1)

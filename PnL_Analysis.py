@@ -87,6 +87,8 @@ test_inputs[input_cols] = scaler.transform(test_inputs[input_cols])
 
 
 
+
+
 X_train , X_val , X_test = train_inputs[input_cols] , val_inputs[input_cols] , test_inputs[input_cols]
 
 OLS = LinearRegression(n_jobs=-1)

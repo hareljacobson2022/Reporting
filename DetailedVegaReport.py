@@ -1,39 +1,25 @@
-import datetime
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
 import seaborn as sns
-from pandas.tseries.offsets import BDay
-import MarketData
+import MarketData, Files_Loader
 sns.set()
 
-#valuation date and reference date (-1BD)
+glb = globals()
+
 value_date = MarketData.value_date
-ref_date = pd.to_datetime(value_date) - BDay(1)
-
-day,month,year = pd.to_datetime(value_date).day, pd.to_datetime(value_date).month,pd.to_datetime(value_date).year
-
-if int(day) < 10:
-    day = str(day).zfill(2)
-
-if int(month) < 10:
-    month = str(month).zfill(2)
-
-ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
-
-
-#csv files location
-file_location = 'C:/Users/user/Downloads'
 
 #reading csv files
-raw_usdils_file = pd.read_csv(fr'{file_location}/USDILS_vol_node_point_analysis_{year}_{month}_{day}_17_30.csv',skiprows=3,header=0)
-raw_eurils_file = pd.read_csv(fr'{file_location}/EURILS_vol_node_point_analysis_{year}_{month}_{day}_17_30.csv',skiprows=3,header=0)
+raw_usdils_file = Files_Loader.raw_usdils_file
+raw_eurils_file = Files_Loader.raw_eurils_file
 
 #creating dataframes:
 # renaming and aranging columns headers
 #dropping non_numeric columns
 files = [raw_usdils_file,raw_eurils_file]
+df_names = ['df_usdils','df_eurils']
+agg_df =[]
 column_names = {'Unnamed: 0':'Book',
                 'Unnamed: 1' : 'Maturity',
                 'Unnamed: 3' : 'ATM_VOL',
@@ -43,15 +29,12 @@ column_names = {'Unnamed: 0':'Book',
                 'Unnamed: 11':'10_BF',
                 'Unnamed: 13': 'Total PnL'}
 
-df_usdils = pd.DataFrame(files[0])
-df_eurils = pd.DataFrame(files[1])
+for file, dataframe in zip(files,df_names):
+    glb[dataframe] = pd.DataFrame(file)\
+                         .iloc[:80,0:]\
+                        .rename(columns=column_names)
+    agg_df.append(dataframe+'_agg')
 
-df_usdils = df_usdils.iloc[:80,0:]
-df_eurils = df_eurils.iloc[:80,0:]
-
-
-df_usdils = df_usdils.rename(columns=column_names)
-df_eurils = df_eurils.rename(columns=column_names)
 
 non_int=[]
 
@@ -59,12 +42,15 @@ for col in df_usdils.iloc[:,2:]:
     if df_usdils[col].dtype !='float64':
         non_int.append(col)
 
+for dataframe in df_names:
+    glb[dataframe] = glb[dataframe].drop(columns=non_int).iloc[:,1:]
 
-df_usdils = df_usdils.drop(columns=non_int).iloc[:,1:]
-df_eurils = df_eurils.drop(columns=non_int).iloc[:,1:]
+
+#deleting raw data files
+del raw_eurils_file,raw_usdils_file,non_int
+
 
 expiry_list =[]
-
 #Aggregating data across maturities:
 #Creating tenor index (from expiry dates)
 #Creating aggergated dataframes for each currency pair based on tenor index
@@ -74,8 +60,9 @@ for item in df_usdils['Maturity']:
     if item not in expiry_list:
         expiry_list.append(item)
 
-df_usdils_agg = pd.DataFrame(columns=df_usdils.columns[1:],index=expiry_list)
-df_eurils_agg = pd.DataFrame(columns=df_eurils.columns[1:],index=expiry_list)
+for dataframe,agg_dataframe in zip(df_names,agg_df):
+    glb[agg_dataframe] = pd.DataFrame(columns=glb[dataframe].columns[1:],index=expiry_list)
+
 
 for col in df_usdils.columns[1:]:
     for term in df_usdils_agg.index:

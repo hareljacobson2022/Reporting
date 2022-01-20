@@ -1,0 +1,25 @@
+[2021-12-23 10:22:03,693;s] - [INFO] - [log] - Send GET request to http://127.0.0.1:9060/api/status to detect API Proxy...
+[2021-12-23 10:22:03,699;s] - [DEBUG] - [log] - Request to http://127.0.0.1:9060/api/status
+	headers = {'x-tr-applicationid': 'de5fd998085b4279b6379598d1503c3796432a5a'}
+	params = None
+[2021-12-23 10:22:03,779;s] - [Level 1] - [log] - HTTP request response 200: {"statusCode":"ST_PROXY_READY","version":"3.1.0"}
+[2021-12-23 10:22:03,780;s] - [INFO] - [log] - Checking proxy url http://127.0.0.1:9060/api/status response : 200 - {"statusCode":"ST_PROXY_READY","version":"3.1.0"}
+[2021-12-23 10:22:03,781;s] - [INFO] - [log] - Port 9060 was retrieved from .portInUse file
+[2021-12-23 10:22:03,782;s] - [INFO] - [log] - Try to handshake on url http://127.0.0.1:9060/api/handshake...
+[2021-12-23 10:22:03,782;s] - [DEBUG] - [log] - Request to http://127.0.0.1:9060/api/handshake
+	headers = {'Content-Type': 'application/json', 'x-tr-applicationid': 'de5fd998085b4279b6379598d1503c3796432a5a'}
+	params = None
+[2021-12-23 10:22:04,395;s] - [Level 1] - [log] - HTTP request response 200: {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcGlWZXJzaW9uIjoiMSIsIkFwcEtleSI6ImRlNWZkOTk4MDg1YjQyNzliNjM3OTU5OGQxNTAzYzM3OTY0MzJhNWEiLCJBcHBTY29wZSI6InRyYXBpIiwiTGlicmFyeU5hbWUiOiJSRFAgUHl0aG9uIExpYnJhcnkiLCJMaWJyYXJ5VmVyc2lvbiI6IjEuMS4xNCIsImlhdCI6MTY0MDI0NzcyNCwiZXhwIjoxNjQxNDU3MzI0fQ.gE12Z0x09f-W8ZdzJuubBXse0SUUsP3dM9gOtmTyv6Q","expires_in":1209600,"token_type":"bearer"}
+[2021-12-23 10:22:04,395;s] - [INFO] - [log] - Response : 200 - {"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcGlWZXJzaW9uIjoiMSIsIkFwcEtleSI6ImRlNWZkOTk4MDg1YjQyNzliNjM3OTU5OGQxNTAzYzM3OTY0MzJhNWEiLCJBcHBTY29wZSI6InRyYXBpIiwiTGlicmFyeU5hbWUiOiJSRFAgUHl0aG9uIExpYnJhcnkiLCJMaWJyYXJ5VmVyc2lvbiI6IjEuMS4xNCIsImlhdCI6MTY0MDI0NzcyNCwiZXhwIjoxNjQxNDU3MzI0fQ.gE12Z0x09f-W8ZdzJuubBXse0SUUsP3dM9gOtmTyv6Q","expires_in":1209600,"token_type":"bearer"}
+[2021-12-23 10:22:04,396;s] - [INFO] - [log] - Application ID: de5fd998085b4279b6379598d1503c3796432a5a
+[2021-12-23 10:22:04,397;s] - [DEBUG] - [set_app_key] - Init a Desktop session with new app_key
+[2021-12-23 10:22:08,732;s] - [TRACE] - [<lambda>] - entity: TimeSeries
+[2021-12-23 10:22:08,733;s] - [TRACE] - [<lambda>] - payload: {'rics': ['ILSSWO=', 'ILS1MO='], 'fields': ['CLOSE', 'TIMESTAMP'], 'interval': 'daily', 'startdate': '2021-12-22T00:00:00', 'enddate': '2021-12-23T00:00:00'}
+[2021-12-23 10:22:08,733;s] - [DEBUG] - [send_json_request] - Request:{'Entity': {'E': 'TimeSeries', 'W': {'rics': ['ILSSWO=', 'ILS1MO='], 'fields': ['CLOSE', 'TIMESTAMP'], 'interval': 'daily', 'startdate': '2021-12-22T00:00:00', 'enddate': '2021-12-23T00:00:00'}}}
+[2021-12-23 10:22:08,734;s] - [DEBUG] - [log] - Request to http://127.0.0.1:9060/api/v1/data
+	headers = {'Content-Type': 'application/json', 'x-tr-applicationid': 'de5fd998085b4279b6379598d1503c3796432a5a', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJBcGlWZXJzaW9uIjoiMSIsIkFwcEtleSI6ImRlNWZkOTk4MDg1YjQyNzliNjM3OTU5OGQxNTAzYzM3OTY0MzJhNWEiLCJBcHBTY29wZSI6InRyYXBpIiwiTGlicmFyeU5hbWUiOiJSRFAgUHl0aG9uIExpYnJhcnkiLCJMaWJyYXJ5VmVyc2lvbiI6IjEuMS4xNCIsImlhdCI6MTY0MDI0NzcyNCwiZXhwIjoxNjQxNDU3MzI0fQ.gE12Z0x09f-W8ZdzJuubBXse0SUUsP3dM9gOtmTyv6Q'}
+	params = None
+[2021-12-23 10:22:09,222;s] - [Level 1] - [log] - HTTP request response 200: {"timeseriesData":[{"dataPoints":[[6.4,"2021-12-22T00:00:00Z"],[6.65,"2021-12-23T00:00:00Z"]],"fields":[{"name":"CLOSE","type":"Double"},{"name":"TIMESTAMP","type":"DateTime"}],"ric":"ILSSWO=","statusCode":"Normal"},{"dataPoints":[[7.325,"2021-12-22T00:00:00Z"],[7.15,"2021-12-23T00:00:00Z"]],"fields":[{"name":"CLOSE","type":"Double"},{"name":"TIMESTAMP","type":"DateTime"}],"ric":"ILS1MO=","statusCode":"Normal"}]}
+[2021-12-23 10:22:09,223;s] - [DEBUG] - [send_json_request] - HTTP Response code: 200
+[2021-12-23 10:22:09,224;s] - [DEBUG] - [send_json_request] - HTTP Response: {"timeseriesData":[{"dataPoints":[[6.4,"2021-12-22T00:00:00Z"],[6.65,"2021-12-23T00:00:00Z"]],"fields":[{"name":"CLOSE","type":"Double"},{"name":"TIMESTAMP","type":"DateTime"}],"ric":"ILSSWO=","statusCode":"Normal"},{"dataPoints":[[7.325,"2021-12-22T00:00:00Z"],[7.15,"2021-12-23T00:00:00Z"]],"fields":[{"name":"CLOSE","type":"Double"},{"name":"TIMESTAMP","type":"DateTime"}],"ric":"ILS1MO=","statusCode":"Normal"}]}
+[2021-12-23 10:22:09,225;s] - [TRACE] - [<lambda>] - Response size: 477
