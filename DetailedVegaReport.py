@@ -53,11 +53,9 @@ expiry_list =[]
 #Creating tenor index (from expiry dates)
 #Creating aggergated dataframes for each currency pair based on tenor index
 
-
 for item in df_usdils['Maturity']:
     if item not in expiry_list:
         expiry_list.append(item)
-
 
 for dataframe,agg_dataframe in zip(df_names,agg_df):
     glb[agg_dataframe] = pd.DataFrame(columns=glb[dataframe].columns[1:],index=expiry_list)

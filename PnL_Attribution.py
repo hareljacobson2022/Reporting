@@ -7,14 +7,13 @@ import seaborn as sns
 from pandas.tseries.offsets import BDay
 from matplotlib.ticker import StrMethodFormatter
 import eikon
-import refinitiv.dataplatform as rdp
 sns.set()
 
 glb=globals()
 
 #setting eiko api key
 eikon.set_app_key('de5fd998085b4279b6379598d1503c3796432a5a')
-rdp.open_desktop_session('de5fd998085b4279b6379598d1503c3796432a5a')
+
 
 #setting file location
 file_location = 'C:/Users/user/Downloads'
@@ -25,11 +24,9 @@ ref_date = pd.to_datetime(value_date) - BDay(1)
 
 day,month,year = ref_date.day, ref_date.month,ref_date.year
 
-if int(day) < 10:
-    day = str(day).zfill(2)
+day = np.where(int(day)<10,str(day).zfill(2),str(day))
+month = np.where(int(month) < 10, str(month).zfill(2),str(month))
 
-if int(month) < 10:
-    month = str(month).zfill(2)
 
 ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
 
@@ -65,10 +62,7 @@ df_delta = df_delta[df_delta.index.isin(trading_books)]
 
 #removing non_numeric columns from the dataframe
 non_int =[]
-
-for col in df:
-    if df[col].dtype !='float64':
-        non_int.append(col)
+non_int = [col for col in df if df[col].dtype !='float64']
 
 df = df.drop(columns=non_int).\
     rename(columns={'Unnamed: 3': 'Delta',
@@ -89,10 +83,6 @@ for item in df.index:
 #creating tickers' list to retrieve data from eikon
 rics =[]
 
-cond1 = ccy[0:3]=='USD'
-cond2 = ccy[4:7]=='USD'
-cond3 = ccy[0:3]=ccy[4:7]
-
 for ccy in df.index:
     if ccy[0:3]=='USD':
         ric = ccy[4:7]+'='
@@ -105,10 +95,7 @@ for ccy in df.index:
     rics.append(ric)
 
 unique_list = []
-
-for item in rics:
-    if item not in unique_list:
-        unique_list.append(item)
+unique_list = [item for item in rics if item not in unique_list[:-1]]
 
 del rics
 

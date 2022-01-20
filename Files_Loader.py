@@ -2,6 +2,7 @@ import pandas as pd
 from pandas.tseries.offsets import BDay
 import MarketData
 import datetime
+from numpy import where
 
 value_date = MarketData.value_date
 ref_date = pd.to_datetime(value_date) - BDay(1)
@@ -11,12 +12,9 @@ day,month,year,weekday = pd.to_datetime(value_date).day, \
                          pd.to_datetime(value_date).year, \
                          pd.to_datetime(value_date).weekday()
 
-
-if int(day) < 10:
-    day = str(day).zfill(2)
-
-if int(month) < 10:
-    month = str(month).zfill(2)
+#adjust the day,month length in the raw data-files when day,month < 10
+day = where(int(day)<10,str(day).zfill(2),str(day))
+month = where(int(month) < 10, str(month).zfill(2),str(month))
 
 ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
 

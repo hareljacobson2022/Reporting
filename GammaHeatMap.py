@@ -128,6 +128,7 @@ for vol,expiry in zip(usdils_vols,t):
     std_pos = std_be(vol,expiry)
     breakeven.append([std_neg, std_pos])
 
+
 for vol, expiry in zip(eurils_vols,t):
     std_neg = -std_be(vol,expiry)
     std_pos = std_be(vol, expiry)
@@ -142,7 +143,7 @@ sns.heatmap(df_strikes,annot=True, fmt=',', linewidth=0.1, annot_kws={'size':7},
             ax=axes[0,0],cbar=False)
 
 ax2 = axes[0,0].twinx()
-ax2.plot(breakeven, color='black',lw=3,alpha=0.5, ls='dotted')
+ax2.plot(breakeven[0], color='black',lw=3,alpha=0.5, ls='dotted')
 ax2.tick_params(axis='both',labelsize=8)
 ax2.grid(False)
 
