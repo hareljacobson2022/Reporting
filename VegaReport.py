@@ -41,10 +41,7 @@ for name, dataframe in zip(file_names,df_list):
 
 #removing non_numeric columns from multiple dataframes
 non_int =[]
-
-for col in df:
-    if df[col].dtype !='int64':
-        non_int.append(col)
+non_int = [col for col in df if df[col].dtype !='int64']
 
 for dataframe in df_list:
     glb[dataframe] = glb[dataframe].drop(columns=non_int)

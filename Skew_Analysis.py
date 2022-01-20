@@ -75,11 +75,8 @@ for dataframe in df_names[0:2]:
 
 
 cols =[]
-for col in df_usdils_md['expiry']:
-    col = col.strftime('%Y-%m-%d')
-    cols.append(col)
 
-
+cols = [col.strftime('%Y-%m-%d') for col in df_usdils_md['expiry']]
 
 df_usdils_skew = pd.DataFrame(columns=cols,index=df_usdils.index)
 df_eurils_skew = pd.DataFrame(columns=cols,index=df_eurils.index)

@@ -18,7 +18,7 @@ eikon.set_app_key('de5fd998085b4279b6379598d1503c3796432a5a')
 file_location = 'C:/Users/user/Downloads'
 
 #setting valuation date and reference rate (value date -1BD)
-value_date = '2022-01-18'
+value_date = '2022-01-19'
 ref_date = pd.to_datetime(value_date) - BDay(1)
 ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
 
@@ -30,11 +30,14 @@ ref_date = datetime.datetime.strftime(ref_date,format='%Y-%m-%d')
 usdils_vol = ['ILSONO=','ILSSWO=','ILS2WO=R','ILS1MO=','ILS2MO=','ILS3MO=','ILS6MO=','ILS9MO=','ILS1YO=','ILS2YO=']
 eurils_vol,eurusd_vol = [],[]
 
-for ticker in usdils_vol:
-    eur_vol = 'EUR'+ticker
-    eurusd = 'EUR'+ticker[3:7]
-    eurils_vol.append(eur_vol)
-    eurusd_vol.append(eurusd)
+# for ticker in usdils_vol:
+#     eur_vol = 'EUR'+ticker
+#     eurusd = 'EUR'+ticker[3:7]
+#     eurils_vol.append(eur_vol)
+#     eurusd_vol.append(eurusd)
+
+eurils_vol = ['EUR'+ticker for ticker in usdils_vol]
+eurusd_vol = ['EUR' + ticker[3:7] for ticker in usdils_vol]
 
 args = (usdils_vol,eurils_vol,eurusd_vol)
 

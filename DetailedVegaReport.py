@@ -38,9 +38,7 @@ for file, dataframe in zip(files,df_names):
 
 non_int=[]
 
-for col in df_usdils.iloc[:,2:]:
-    if df_usdils[col].dtype !='float64':
-        non_int.append(col)
+non_int =[col for col in df_usdils.iloc[:,2:] if df_usdils[col].dtype != 'float64']
 
 for dataframe in df_names:
     glb[dataframe] = glb[dataframe].drop(columns=non_int).iloc[:,1:]
@@ -59,6 +57,7 @@ expiry_list =[]
 for item in df_usdils['Maturity']:
     if item not in expiry_list:
         expiry_list.append(item)
+
 
 for dataframe,agg_dataframe in zip(df_names,agg_df):
     glb[agg_dataframe] = pd.DataFrame(columns=glb[dataframe].columns[1:],index=expiry_list)

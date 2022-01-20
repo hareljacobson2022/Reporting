@@ -89,6 +89,10 @@ for item in df.index:
 #creating tickers' list to retrieve data from eikon
 rics =[]
 
+cond1 = ccy[0:3]=='USD'
+cond2 = ccy[4:7]=='USD'
+cond3 = ccy[0:3]=ccy[4:7]
+
 for ccy in df.index:
     if ccy[0:3]=='USD':
         ric = ccy[4:7]+'='
